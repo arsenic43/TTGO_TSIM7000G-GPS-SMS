@@ -361,7 +361,6 @@ void loop(){
         // DBG("SMS:", res ? "OK" : "fail");
 
         message = "https://www.google.com/maps/search/?api=1&query=" + String(lat,6) + "%2C" + String(lon,6);
-        //message = ("https://www.google.fr/maps/@" + String(lat,6) + "," + String(lon,6) + "z");
         Serial.println(message);  
         res = modem.sendSMS(SMS_TARGET, message);
         // DBG("SMS:", res ? "OK" : "fail");        
