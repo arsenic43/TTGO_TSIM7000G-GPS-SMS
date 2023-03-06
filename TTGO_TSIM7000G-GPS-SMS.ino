@@ -47,7 +47,7 @@ const char gprsPass[] = "orange";
 #endif
 
 #define uS_TO_S_FACTOR 1000000ULL  // Conversion factor for micro seconds to seconds
-#define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
+#define TIME_TO_SLEEP  240          // Time ESP32 will go to sleep (in seconds)
 
 #define UART_BAUD   115200
 #define PIN_DTR     25
@@ -61,6 +61,9 @@ const char gprsPass[] = "orange";
 #define SD_CS       13
 #define LED_PIN     12
 
+#define BAT_ADC     35
+
+
 int counter, lastIndex, numberOfPieces = 24;
 String pieces[24], input;
 
@@ -68,6 +71,10 @@ void setup(){
   // Set console baud rate
   Serial.begin(115200);
   delay(10);
+
+
+
+
 
   // Set LED OFF
   pinMode(LED_PIN, OUTPUT);
@@ -300,8 +307,19 @@ void loop(){
   while (1) {
     if (modem.getGPS(&lat, &lon, &speed, &alt, &vsat, &usat, &accuracy, &year, &month, &day, &hour, &min, &sec))    
     {
-      Serial.printf("%f-%f-%f %fh%f-/f sec : lat:%f lon:%f\n", year, month, day, hour, min, sec, lat, lon);
-      break;
+
+        Serial.println("================ Fix GPS OK================");
+        message = String(year) + "-" + String(month) + "-" +  String(day) + " " + String(hour) + "H" + String(min) + ":" + String(sec) + " lat: " + String(lat,6) + " lon: " + String(lon,6);
+        Serial.println(message);
+
+//        message = analogRead(BAT_ADC);
+//        Serial.println("Niveau batterie :");        
+//        Serial.println(message);
+
+//        message = ("https://www.google.fr/maps/@" + String(lat,6) + "," + String(lon,6) + "z");
+//        Serial.println(message);        
+                
+        break;
     } 
     else 
     {
@@ -331,19 +349,22 @@ void loop(){
   }
   Serial.println("\n---End of GPRS TEST---\n");
 
+  Serial.println("\n--------TESTING SENDING SMS--------\n");
 
   // --------TESTING SENDING SMS--------
-//  res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
+        //  res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
 
- message = String(year) + "-" + String(month) + "-" +  String(day) + " " + String(hour) + "H" + String(min) + ":" + String(sec) + " " "lat: " + String(lat) + " lon: " + String(lon);
-// message = ("%f-%f-%f %fh%f-/f sec : lat:%f lon:%f\n", year, month, day, hour, min, sec, lat, lon);
+        float batt = analogRead(BAT_ADC);
+        message = String(year) + "-" + String(month) + "-" +  String(day) + " " + String(hour) + "H" + String(min) + ":" + String(sec) + "\nlat: " + String(lat,6) + " lon: " + String(lon,6) + "\nBatt: " + String(batt,5);
+        Serial.println(message);
+        res = modem.sendSMS(SMS_TARGET, message);
+        // DBG("SMS:", res ? "OK" : "fail");
 
- 
- Serial.println(message);
- 
-  res = modem.sendSMS(SMS_TARGET, message);
- // DBG("SMS:", res ? "OK" : "fail");
-
+        message = "https://www.google.com/maps/search/?api=1&query=" + String(lat,6) + "%2C" + String(lon,6);
+        //message = ("https://www.google.fr/maps/@" + String(lat,6) + "," + String(lon,6) + "z");
+        Serial.println(message);  
+        res = modem.sendSMS(SMS_TARGET, message);
+        // DBG("SMS:", res ? "OK" : "fail");        
 
   // --------TESTING POWER DONW--------
 
