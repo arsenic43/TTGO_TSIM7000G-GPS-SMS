@@ -8,6 +8,15 @@
   The above copyright notice and this permission notice shall be included in all
   copies or substantial portions of the Software.
 */
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <AsyncElegantOTA.h>
+
+const char* ssid = "SFR_95C0";
+const char* password = "tguq3twq76nazc8jhn33";
+
+AsyncWebServer server(80);
 
 // Based on the following example: https://github.com/Xinyuan-LilyGO/LilyGO-T-SIM7000G/blob/master/examples/Arduino_TinyGSM/AllFunctions/AllFunctions.ino
 
@@ -23,6 +32,7 @@
 
 int cpt = 0;
 String message = "" ;
+String lien = "" ;
  
 // Your GPRS credentials, if any
 const char apn[]  = "fnetnrj";     //SET TO YOUR APN
@@ -116,13 +126,13 @@ void loop(){
     Serial.println("Failed to restart modem, attempting to continue without restarting");
   }
 
-  String name = modem.getModemName();
-  delay(500);
-  Serial.println("Modem Name: " + name);
+//  String name = modem.getModemName();
+//  delay(500);
+//  Serial.println("Modem Name: " + name);
 
-  String modemInfo = modem.getModemInfo();
-  delay(500);
-  Serial.println("Modem Info: " + modemInfo);
+//  String modemInfo = modem.getModemInfo();
+//  delay(500);
+//  Serial.println("Modem Info: " + modemInfo);
   
 
   // Unlock your SIM card with a PIN if needed
@@ -355,14 +365,15 @@ void loop(){
         //  res = modem.sendSMS(SMS_TARGET, String("Hello from ") + imei);
 
         float batt = analogRead(BAT_ADC);
-        message = String(year) + "-" + String(month) + "-" +  String(day) + " " + String(hour) + "H" + String(min) + ":" + String(sec) + "\nlat: " + String(lat,6) + " lon: " + String(lon,6) + "\nBatt: " + String(batt,5);
+        float map_batt = map(batt,2134,2311,0,100);
+        message = String(year) + "-" + String(month) + "-" +  String(day) + " " + String(hour) + "H" + String(min) + ":" + String(sec) + "\nlat: " + String(lat,6) + " lon: " + String(lon,6) + "\nBatt: " + String(batt,2)+ "\nMap_Batt: " + String(map_batt,2);
         Serial.println(message);
         res = modem.sendSMS(SMS_TARGET, message);
         // DBG("SMS:", res ? "OK" : "fail");
 
-        message = "https://www.google.com/maps/search/?api=1&query=" + String(lat,6) + "%2C" + String(lon,6);
-        Serial.println(message);  
-        res = modem.sendSMS(SMS_TARGET, message);
+        lien = "https://www.google.com/maps/search/?api=1&query=" + String(lat,6) + "%2C" + String(lon,6);
+        Serial.println(lien);  
+        res = modem.sendSMS(SMS_TARGET, lien);
         // DBG("SMS:", res ? "OK" : "fail");        
 
   // --------TESTING POWER DONW--------
